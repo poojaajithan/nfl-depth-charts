@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         DepthChartManager manager = new DepthChartManager();
 
-        // 1. Initialize Players
+        // initialize Players
         Player tomBrady = new Player(12, "Tom Brady");
         Player blaineGabbert = new Player(11, "Blaine Gabbert");
         Player kyleTrask = new Player(2, "Kyle Trask");
@@ -18,7 +18,7 @@ public class Main {
         Player jaelonDarden = new Player(1, "Jaelon Darden");
         Player scottMiller = new Player(10, "Scott Miller");
 
-        // 2. Add Players to Depth Chart
+        // add Players to Depth Chart
         System.out.println("--- Adding Players ---");
         manager.addPlayerToDepthChart("QB", tomBrady, 0);
         manager.addPlayerToDepthChart("QB", blaineGabbert, 1);
@@ -29,33 +29,32 @@ public class Main {
         manager.addPlayerToDepthChart("LWR", scottMiller, 2);
         System.out.println("Players added successfully.\n");
 
-        // 3. Test getBackups (Correcting FanDuel's "QB" typo for LWR players)
+        // test getBackups for various scenarios
         System.out.println("--- Testing getBackups ---");
         printBackups("QB", tomBrady, manager.getBackups("QB", tomBrady));
         
-        // *Fixed typo from PDF: Jaelon Darden is LWR, not QB
+        // *Fixed typo in PDF: Jaelon Darden is LWR, not QB
         printBackups("LWR", jaelonDarden, manager.getBackups("LWR", jaelonDarden)); 
         
-        // *Fixed typo from PDF: Mike Evans is LWR, not QB
-        printBackups("LWR", mikeEvans, manager.getBackups("LWR", mikeEvans)); 
+        printBackups("QB", mikeEvans, manager.getBackups("QB", mikeEvans)); 
         
         printBackups("QB", blaineGabbert, manager.getBackups("QB", blaineGabbert));
         printBackups("QB", kyleTrask, manager.getBackups("QB", kyleTrask));
         System.out.println();
 
-        // 4. Print Full Depth Chart
+        // print Full Depth Chart
         System.out.println("--- Full Depth Chart (Before Removal) ---");
         manager.getFullDepthChart();
         System.out.println();
 
-        // 5. Test Removal (Correcting FanDuel's "WR" typo to "LWR")
+        // test Removal 
         System.out.println("--- Testing removePlayerFromDepthChart ---");
         // *Fixed typo from PDF: Removing from LWR instead of WR
         List<Player> removed = manager.removePlayerFromDepthChart("LWR", mikeEvans);
         System.out.println("Removed: " + removed);
         System.out.println();
 
-        // 6. Print Full Depth Chart Again
+        // print Full Depth Chart Again
         System.out.println("--- Full Depth Chart (After Removal) ---");
         manager.getFullDepthChart();
     }
