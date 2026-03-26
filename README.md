@@ -3,73 +3,67 @@
 This project implements an in-memory Depth Chart Manager for sports teams. It provides a robust, strictly typed, and encapsulated API to add players, remove players, and query backups across various positions.
 
 ## How to Build and Run
-
 ### Prerequisites
-* Java 17 or higher
-* Maven 
+Java 17 or higher
 
-### Running the Application
-To see the application execute the sample inputs provided in the requirements:
-1. Navigate to the root directory.
-2. Compile and run the `Main.java` class located at `src/main/java/com/trading/depthcharts/Main.java`.
-   ```bash
-   javac src/main/java/com/trading/depthcharts/**/*.java
-   java -cp src/main/java com.trading.depthcharts.Main
+Apache Maven
 
-Running the Tests
-Automated unit tests have been implemented using JUnit 5 to verify edge cases, out-of-bounds insertions, and encapsulation security.
+### Building the Project
+To compile the project and manage dependencies:
 
-Run your IDE's built-in test runner on DepthChartManagerTest.java
+```bash
+mvn clean compile
+### Running the Automated Tests
+As this is a library-style core engine, validation is performed through a comprehensive JUnit 5 test suite. To execute the tests and verify the domain logic:
+```
 
-Or via Maven: mvn test
+```bash
+mvn test
+```
 
-Assumptions & Design Decisions
-1. The Domain Model (Java 17 Records)
-The requirements state: "Assume that a number within the team uniquely identifies that player." To enforce this, Player is implemented as an immutable Java 17 record. The default equals() and hashCode() methods were explicitly overridden to evaluate only the player's number. This allows the system to easily identify and remove existing players from lists without relying on identical object references in memory.
+## Design Decisions & Assumptions
+### 1. The Domain Model (Java 17 Records)
+The requirements state: "Assume that a number within the team uniquely identifies that player." To enforce this, Player is implemented as an immutable Java 17 record. The equals() and hashCode() methods were explicitly overridden to evaluate only the player's unique number. This allows the system to accurately identify and remove players without relying on object reference equality.
 
-2. Internal Data Structure
+### 2. Internal Data Structure
 The core state is managed via a LinkedHashMap<String, List<Player>>.
 
-O(1) Lookups: Provides instant access to any position's depth chart.
+O(1) Lookups: Provides near-instant access to any position's depth chart.
 
-Insertion Order Preservation: LinkedHashMap guarantees that when getFullDepthChart() is called, the positions are printed in the exact order they were initially added to the system.
+Deterministic Ordering: LinkedHashMap ensures that when getFullDepthChart() is called, positions are printed in the exact order they were initially registered in the system.
 
-3. Strict Typing for Removal (Method Signature Adjustment)
-The prompt requested a removal method that returns the removed player on success, but an empty list on failure. Returning a single object on success and a Collection on failure breaks Java's strict typing and requires returning null or Object. To maintain type safety, removePlayerFromDepthChart returns a List<Player>. It securely returns List.of(removedPlayer) on success, and Collections.emptyList() if the player is not found.
+### 3. Strict Typing for Removal
+The prompt requested a removal method that returns the removed player on success, but an empty list on failure. To maintain strict type safety and avoid returning null or raw Object types, removePlayerFromDepthChart returns a List<Player>.
 
-4. Encapsulation & Memory Safety
-When querying backups via getBackups, returning a direct List.subList() exposes a mutable view of the internal Depth Chart. If a client clears or modifies that returned list, it corrupts the internal state. To prevent this encapsulation leak, the sublist is safely wrapped in a new ArrayList before being returned.
+Success: Returns List.of(removedPlayer).
 
-5. Design Decision: Console Output vs. Logging Frameworks
-To ensure this project is lightweight, dependency-free, and easy for the reviewing panel to compile and run out of the box, standard System.out was used for the requested print statements. In a production environment (such as a Spring Boot application), this would be replaced with a standard logging facade like SLF4J.
+Failure: Returns Collections.emptyList().
 
-Scaling & Architecture
-The "Important Notes" section asked how this solution would scale to handle all NFL teams and other sports (MLB, NHL, NBA).
+### 4. Encapsulation & Memory Safety
+When querying backups via getBackups, returning a direct List.subList() would expose a mutable view of the internal depth chart. To prevent encapsulation leaks, the sublist is wrapped in a new ArrayList before being returned, ensuring external callers cannot inadvertently modify the internal state.
 
-1. Composition Over Modification
-The DepthChartManager is currently designed to be perfectly sport-agnostic. It purely handles the mathematics of arrays, insertions, and shifting. To scale this system to the entire league, I would use Composition:
+### 5. Console Output vs. Logging
+To ensure the project remains lightweight and easy to execute in any environment, standard System.out is used for the requested print functionality. In a production environment, this would be replaced with a standard logging facade such as SLF4J.
 
-A LeagueManager contains a Map<String, Team>.
+## Scaling & Architecture
+### 1. Composition Over Modification
+The DepthChartManager is designed to be sport-agnostic. It purely handles the logic of roster mathematics (insertions, shifting, and removals). To scale this to an entire league (NBA, MLB, NHL):
 
-A Team entity contains its own independent instance of DepthChartManager.
-This adheres to the Single Responsibility Principle, ensuring the Depth Chart logic remains completely isolated from League or Roster constraints.
+A LeagueManager would contain a Map<String, Team>.
 
-2. Primitive Obsession vs. Contract Strictness
-To strictly adhere to the requested sample API (e.g., addPlayerToDepthChart("QB", player, 0)), the position parameter is kept as a raw String. However, relying on Strings introduces the risk of runtime typos (e.g., "QXB").
+Each Team entity would encapsulate its own instance of DepthChartManager.
+This maintains the Single Responsibility Principle, keeping the core logic isolated from organizational constraints.
 
-In a production environment, I would refactor this to use interface-driven Enums to enforce compile-time safety across different sports:
+### 2. Addressing Primitive Obsession
+To adhere strictly to the requested API signatures, positions are passed as raw Strings. In a production setting, I would refactor this to use Interface-driven Enums to enforce compile-time safety and prevent runtime typos:
 
 Java
 public interface Position { String name(); }
 public enum NFLPosition implements Position { QB, LWR, RB }
-public enum NBAPosition implements Position { PG, SG, PF }
+public enum NBAPosition implements Position { PG, SG, SF }
+## Notes on Requirement Corrections
+While implementing the automated unit tests, the following corrections were applied to the sample data logic to ensure technical accuracy:
 
-Notes on Sample Data Corrections
-While implementing the provided test cases from the requirements document, a few minor typos in the sample data were corrected in my Main.java execution to ensure accurate testing:
+Position Mapping: The sample output queried backups for players under the "QB" position, though they were registered as "LWR". The unit tests correctly target the specific position keys.
 
-Backup Queries: Jaelon Darden and Mike Evans were added to "LWR", but the sample outputs queried their backups under "QB". The test execution maps them correctly to "LWR".
-
-Removal Query: Mike Evans was added to "LWR", but the sample removal command attempted to remove him from "WR". This was corrected to "LWR".
-
-
-***
+Removal Scope: The sample removal command attempted to remove a player from "WR", though the registration occurred under "LWR". The test suite uses consistent keys to verify the logic correctly.
