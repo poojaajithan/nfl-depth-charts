@@ -6,8 +6,13 @@ This project implements an in-memory, multi-sport Depth Chart Manager. It provid
 
 ### 1. The Domain Model & Strict Validation
 To guarantee data integrity, `Player` is implemented as an immutable Java 17 `record`. 
-* **Identity Management:** The `equals()` and `hashCode()` methods are explicitly overridden to evaluate *only* the player's unique jersey number. This allows the system to accurately identify and remove players without relying on object reference equality.
+* **Fail-Fast Validation:** The `Player` record enforces strict validation at the moment of instantiation. This ensures that no "invalid" player objects can exist within the system. Key constraints include:
+    * **Jersey Numbers:** Must be within the standard range (0-99).
+    * **Name Integrity:** Names cannot be null, blank, and must be between 2 and 50 characters.
+    * **Auto-Formatting:** Input names are automatically converted to "Proper Case" (e.g., "tom brady" becomes "Tom Brady") to ensure consistent console output and searchability.
+* **Identity Management:** The `equals()` and `hashCode()` methods are explicitly overridden to evaluate *only* the player's unique jersey number.
 * **Fail-Fast Instantiation:** A custom InvalidPlayerException is thrown at the model level if a player is instantiated with invalid data.
+* **Team Identity & Metadata:** The DepthChartManager is initialized with both a teamNameShort (e.g., "TB") for concise logging and a teamNameLong (e.g., "Tampa Bay Buccaneers") for formal reporting, ensuring clear ownership of the data.
 * **Constructor Guardrails:** The DepthChartManager constructor acts as a domain "bouncer," throwing a DepthChartException if initialized with null sports, invalid team name lengths, or blank strings.
 * **Global Roster Integrity:** The system ensures that players assigned to multiple positions (e.g., a player starting at both LT and RT) are only counted once against the global maximum roster limit by dynamically calculating distinct player instances.
 
