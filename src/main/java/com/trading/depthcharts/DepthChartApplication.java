@@ -1,14 +1,16 @@
 package com.trading.depthcharts;
 
 import com.trading.depthcharts.model.Player;
+import com.trading.depthcharts.model.Sport;
 import com.trading.depthcharts.service.DepthChartManager;
 
 import java.util.List;
 
-public class Main {
+public class DepthChartApplication {
     public static void main(String[] args) {
-        DepthChartManager manager = new DepthChartManager();
-
+        
+        DepthChartManager manager = new DepthChartManager(Sport.NFL, "TB", "Tampa Bay Buccaneers");
+        
         // initialize Players
         Player tomBrady = new Player(12, "Tom Brady");
         Player blaineGabbert = new Player(11, "Blaine Gabbert");

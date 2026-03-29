@@ -1,14 +1,16 @@
 package com.trading.depthcharts.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.trading.depthcharts.exception.DepthChartException;
 import com.trading.depthcharts.model.Player;
+import com.trading.depthcharts.model.Position;
+import com.trading.depthcharts.model.Sport;
 
 /**
  * A service class responsible for managing the depth chart of a sports team.
@@ -26,9 +28,19 @@ import com.trading.depthcharts.model.Player;
 
 public class DepthChartManager {
     private final Map<String, List<Player>> depthChart;
+    private final String teamNameShort;
+    private final String teamNameLong;
+    private final Sport sport;
 
-    public DepthChartManager() {
+    //NFL active roster has exactly 53 players
+    private static final int MAX_ROSTER_SIZE = 53;
+    private static final int MAX_DEPTH_PER_POSITION = 5;
+
+    public DepthChartManager(Sport sport, String teamNameShort, String teamNameLong) {
         this.depthChart = new LinkedHashMap<>();
+        this.teamNameShort = Objects.requireNonNull(teamNameShort, "Short team name required");
+        this.teamNameLong = Objects.requireNonNull(teamNameLong, "Long team name required");
+        this.sport = Objects.requireNonNull(sport, "Sport type required");
     }
     
     /**
@@ -36,23 +48,37 @@ public class DepthChartManager {
      * @param position      The position (e.g., "QB", "LWR")
      * @param player        The Player object
      * @param positionDepth The 0-indexed depth. If null, appends to the end of the chart.
+     * @throws DepthChartException if roster limits are exceeded or data is invalid.
      */
 
     public void addPlayerToDepthChart(String position, Player player, Integer positionDepth) {
-        Objects.requireNonNull(position, "Position cannot be null");
+        String formatPosition = validatePosition(position);
         Objects.requireNonNull(player, "Player cannot be null");
+
+        if (positionDepth != null && positionDepth < 0) {
+            throw new DepthChartException("Position depth cannot be negative. Provided: " + positionDepth);
+        }
+
+        List<Player> playersList = depthChart.computeIfAbsent(formatPosition, k -> new ArrayList<>());
         
-        List<Player> playersList = depthChart.computeIfAbsent(position, k -> new ArrayList<>());
+        if (getTotalPlayersCount() >= MAX_ROSTER_SIZE && !playersList.contains(player)){
+            throw new DepthChartException("Maximum roster limit of " + MAX_ROSTER_SIZE + " reached.");
+        }
         
-        // if player is already present, remove them first to prevent a duplicate entry
+        if (playersList.size() >= MAX_DEPTH_PER_POSITION && !playersList.contains(player)){
+            throw new DepthChartException("Maximum depth of " + MAX_DEPTH_PER_POSITION + " reached for position: " + formatPosition);
+        }
+
+        // if player present, remove it first to prevent a duplicate entry
         playersList.remove(player);
 
-        if (positionDepth == null || positionDepth < 0 || positionDepth > playersList.size()){
-            // if depth is invalid, rule is to append player at end
+        if (positionDepth == null || positionDepth > playersList.size()){
             playersList.add(player);
+            logAction("ADD", player, formatPosition, "Appended to end of chart.");
         }
         else{
             playersList.add(positionDepth, player);
+            logAction("ADD", player, formatPosition, "Inserted at depth " + positionDepth + ".");
         }
     }
 
@@ -64,20 +90,27 @@ public class DepthChartManager {
      * Returns an empty List if the position does not exist, or if the player is not found at that position.
      */
     public List<Player> removePlayerFromDepthChart(String position, Player player){
-        Objects.requireNonNull(position, "Position cannot be null");
+        String formatPosition = validatePosition(position);
         Objects.requireNonNull(player, "Player cannot be null");
 
-        List<Player> playersList = depthChart.get(position);
-        if (playersList == null || playersList.isEmpty()){
-            return Collections.emptyList();
+        List<Player> playersList = depthChart.getOrDefault(formatPosition, List.of());
+        if (playersList.isEmpty()){
+            return List.of();
         }
         
         int removePlayerIndex = playersList.indexOf(player);
         if (removePlayerIndex >= 0){
-            return List.of(playersList.remove(removePlayerIndex));
+            Player removedPlayer = playersList.remove(removePlayerIndex);
+            logAction("REMOVE", player, formatPosition, "Removed successfully.");
+
+            if (playersList.isEmpty()) {
+                depthChart.remove(formatPosition);
+            }
+
+            return List.of(removedPlayer);
         }
         
-        return Collections.emptyList();
+        return List.of();
     }
 
     /**
@@ -91,20 +124,25 @@ public class DepthChartManager {
      * listed at that position, or the player has no backups.
      */
     public List<Player> getBackups(String position, Player player){
-        Objects.requireNonNull(position, "Position cannot be null");
+        String formatPosition = validatePosition(position);
         Objects.requireNonNull(player, "Player cannot be null");
 
-        List<Player> playersList = depthChart.get(position);
-        if (playersList == null || playersList.isEmpty()){
-            return Collections.emptyList();
+        List<Player> playersList = depthChart.getOrDefault(formatPosition, List.of());
+        
+        if (playersList.isEmpty()){
+            logAction("QUERY", player, formatPosition, "No active players found at position.");
+            return List.of();
         }
 
         int playerIndex = playersList.indexOf(player);
         if (playerIndex >= 0){
-            return new ArrayList<>(playersList.subList(playerIndex+1, playersList.size()));
+            List<Player> backups = new ArrayList<>(playersList.subList(playerIndex + 1, playersList.size()));
+            logAction("QUERY", player, formatPosition, "Found " + backups.size() + " backup(s).");
+            return backups;
         }
 
-        return Collections.emptyList();
+        logAction("QUERY", player, formatPosition, "Player is not currently listed at this position.");
+        return List.of();
     }
 
     /**
@@ -115,6 +153,14 @@ public class DepthChartManager {
      * Positions with no active players are skipped to maintain clean output.
      */
     public void getFullDepthChart(){
+        
+        System.out.println("=== " + teamNameLong + " (" + sport + ") Depth Chart ===");        
+        
+        if (depthChart.isEmpty()) {
+            System.out.println("The depth chart is currently empty.");
+            return;
+        }
+
         for(Map.Entry<String, List<Player>> entry : depthChart.entrySet()){
             String position = entry.getKey();
             List<Player> players = entry.getValue();
@@ -130,5 +176,39 @@ public class DepthChartManager {
                                                     
             System.out.println(position + " - " + formattedPlayersOutput);
         }
+    }
+
+    /**
+     * Validates and sanitizes the position string.
+     * @param position The raw position string.
+     * @return The trimmed, uppercase version of the position.
+     * @throws DepthChartException if the position is null or empty
+     */
+    private String validatePosition(String position) {
+        if (position == null || position.isBlank()) { 
+            throw new DepthChartException("Position cannot be null or empty");
+        }
+        
+        String formatPosition =  position.trim().toUpperCase();
+        try{
+            Position.valueOf(formatPosition); 
+            return formatPosition;
+        }
+        catch(IllegalArgumentException e)
+        {
+            throw new DepthChartException("Invalid position: " + formatPosition + " for sport: " + sport);
+        }
+    }
+
+    private int getTotalPlayersCount() {
+        return depthChart.values()
+                        .stream()
+                        .mapToInt(List::size)
+                        .sum();     
+    }
+
+    private void logAction(String action, Player player, String position, String details) {
+        System.out.printf("[%s] %s | %s at %s | %s%n", 
+            teamNameShort, action, player.name(), position, details);
     }
 }

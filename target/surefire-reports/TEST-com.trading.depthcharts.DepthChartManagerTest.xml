@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.trading.depthcharts.DepthChartManagerTest" time="0.021" tests="8" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.trading.depthcharts.DepthChartManagerTest" time="0.073" tests="28" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="IN"/>
     <property name="sun.boot.library.path" value="/opt/homebrew/Cellar/openjdk@17/17.0.16/libexec/openjdk.jdk/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire/surefirebooter-20260326222253877_3.jar /Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire 2026-03-26T22-22-53_779-jvmRun1 surefire-20260326222253877_1tmp surefire_0-20260326222253877_2tmp"/>
+    <property name="sun.java.command" value="/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire/surefirebooter-20260328171545055_3.jar /Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire 2026-03-28T17-15-45_026-jvmRun1 surefire-20260328171545055_1tmp surefire_0-20260328171545055_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/test-classes:/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/classes:/Users/poojaraviraj/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/Users/poojaraviraj/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/Users/poojaraviraj/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/poojaraviraj/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/Users/poojaraviraj/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/Users/poojaraviraj/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:"/>
@@ -28,7 +28,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire/surefirebooter-20260326222253877_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/target/surefire/surefirebooter-20260328171545055_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="17.0.16+0"/>
@@ -56,12 +56,61 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="testGetBackups_EncapsulationSecurity" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.006"/>
-  <testcase name="testGetBackups_ReturnCorrectSublist" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
-  <testcase name="testGetFullDepthChart_PrintsCorrectFormatAndSkipsEmpty" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.004"/>
-  <testcase name="testAddPlayer_ShiftExistingPlayersDown" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
-  <testcase name="testGetBackups_NoBackup_ReturnEmptyList" classname="com.trading.depthcharts.DepthChartManagerTest" time="0"/>
-  <testcase name="testRemovePlayer_NotFound_ReturnsEmptyList" classname="com.trading.depthcharts.DepthChartManagerTest" time="0"/>
-  <testcase name="testAddPlayer_NullOrOutOfBoundsDepth_AppendToEnd" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
-  <testcase name="testRemovePlayer_ReturnListWithPlayer_RemoveFromChart" classname="com.trading.depthcharts.DepthChartManagerTest" time="0"/>
+  <testcase name="testAddPlayerInsertMiddle" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.01">
+    <system-out><![CDATA[[TB] ADD | Tom Brady at QB | Inserted at depth 0.
+[TB] ADD | Kyle Trask at QB | Inserted at depth 1.
+[TB] ADD | Blaine Gabbert at QB | Inserted at depth 1.
+[TB] QUERY | Tom Brady at QB | Found 2 backup(s).
+]]></system-out>
+  </testcase>
+  <testcase name="testGetBackupsNullPlayer" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testGetBackupsWrongPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001">
+    <system-out><![CDATA[[TB] ADD | Mike Evans at LWR | Inserted at depth 0.
+[TB] ADD | Tom Brady at QB | Inserted at depth 0.
+[TB] QUERY | Mike Evans at QB | Player is not currently listed at this position.
+]]></system-out>
+  </testcase>
+  <testcase name="testRemovePlayerInvalidPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.005"/>
+  <testcase name="testRemovalFlow" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.006">
+    <system-out><![CDATA[[TB] ADD | Mike Evans at LWR | Inserted at depth 0.
+[TB] ADD | Jaelon Darden at LWR | Inserted at depth 1.
+[TB] ADD | Scott Miller at LWR | Inserted at depth 2.
+[TB] REMOVE | Mike Evans at LWR | Removed successfully.
+[TB] QUERY | Jaelon Darden at LWR | Found 1 backup(s).
+]]></system-out>
+  </testcase>
+  <testcase name="testAddPlayerNullPlayer" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.01"/>
+  <testcase name="testGetBackupsSequence" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001">
+    <system-out><![CDATA[[TB] ADD | Tom Brady at QB | Inserted at depth 0.
+[TB] ADD | Blaine Gabbert at QB | Inserted at depth 1.
+[TB] ADD | Kyle Trask at QB | Inserted at depth 2.
+[TB] ADD | Mike Evans at LWR | Inserted at depth 0.
+[TB] ADD | Jaelon Darden at LWR | Inserted at depth 1.
+[TB] ADD | Scott Miller at LWR | Inserted at depth 2.
+[TB] QUERY | Tom Brady at QB | Found 2 backup(s).
+[TB] QUERY | Jaelon Darden at LWR | Found 1 backup(s).
+[TB] QUERY | Kyle Trask at QB | Found 0 backup(s).
+]]></system-out>
+  </testcase>
+  <testcase name="testAddPlayerNullPostion" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.002"/>
+  <testcase name="testGetFullDepthChart" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.005"/>
+  <testcase name="testGetBackups" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testPlayerMultiplePositions" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testGetBackupsPositionMissing" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testRemovePlayerNullPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testRemovePlayer" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.003"/>
+  <testcase name="testRemovePlayerNullPlayer" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testAddPlayerDuplicateEntry" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testGetBackupsInvalidPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testAddPlayer" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testAddPlayerInvalidPositionDepth" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testGetBackupsNullPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testGetBackupsPositionEmpty" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testAddPlayerInvalidPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testGetBackupsNoBackupPresent" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testRemovePlayerFromEmptyPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.001"/>
+  <testcase name="testRemovePlayerNotFoundInPosition" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testRemovePlayerNonExistent" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testGetBackupsModifyList" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
+  <testcase name="testAddPlayerAtNegativePositionDepth" classname="com.trading.depthcharts.DepthChartManagerTest" time="0.0"/>
 </testsuite>

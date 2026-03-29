@@ -1,3 +1,7 @@
 /Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/Main.java
+/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/exception/DepthChartException.java
+/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/exception/InvalidPlayerException.java
 /Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/model/Player.java
+/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/model/Position.java
+/Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/model/Sport.java
 /Users/poojaraviraj/eclipse-workspace/nfl-depth-charts/src/main/java/com/trading/depthcharts/service/DepthChartManager.java
