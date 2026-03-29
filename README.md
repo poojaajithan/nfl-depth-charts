@@ -7,18 +7,21 @@ This project implements an in-memory Depth Chart Manager for sports teams. It pr
 ### 1. The Domain Model & Strict Validation
 To guarantee data integrity, `Player` is implemented as an immutable Java 17 `record`. 
 * **Identity Management:** The `equals()` and `hashCode()` methods are explicitly overridden to evaluate *only* the player's unique jersey number. This allows the system to accurately identify and remove players without relying on object reference equality.
-* **Fail-Fast Instantiation:** A custom `InvalidPlayerException` is thrown at the model level if a player is instantiated with invalid data (e.g., negative numbers, empty strings, or invalid lengths), completely protecting the service layer from bad data.
+* **Fail-Fast Instantiation:** A custom InvalidPlayerException is thrown at the model level if a player is instantiated with invalid data.
+* **Constructor Guardrails:** The DepthChartManager constructor acts as a domain "bouncer," throwing a DepthChartException if initialized with null sports, invalid team name lengths, or blank strings.
 
 ### 2. Internal Data Structure & Memory Safety
 The core state is managed via a `LinkedHashMap<String, List<Player>>`.
 * **Deterministic Ordering:** `LinkedHashMap` ensures that when `getFullDepthChart()` is called, positions are printed in the exact order they were initially registered in the system.
 * **Encapsulation:** When querying backups via `getBackups()`, returning a direct `List.subList()` would expose a mutable view of the internal depth chart. To prevent encapsulation leaks, the sublist is wrapped in a `new ArrayList<>()` before being returned, ensuring external callers cannot inadvertently modify the internal state.
 
-### 3. Business Logic & Roster Limits
-A custom `DepthChartException` governs the strict sports logic of the application. The system automatically enforces:
-* **Max Roster Size:** Capped at 53 active players.
-* **Max Position Depth:** Capped at 5 players per position.
-* Attempting to violate these rules throws a unified domain exception, keeping the core state pristine.
+### 3. Dynamic Business Logic (Open/Closed Principle)
+The system is built to scale beyond the NFL. By utilizing a data-driven Sport Enum, the application automatically enforces limits dynamically:
+
+* **Dynamic Roster Size:** Limits (e.g., 53 for NFL) are fetched from the Enum, allowing the same service to support MLB or NBA without code changes.
+* **Position Depth:** Maximum depth per position is validated against the specific sport's requirements.
+
+Attempting to violate these rules throws a unified DepthChartException.
 
 ### 4. Overcoming Primitive Obsession
 To ensure compile-time safety and prevent runtime typos, raw string inputs for positions and sports are sanitized and validated against strictly defined `Position` and `Sport` Enums before any map lookups occur. 
@@ -35,30 +38,30 @@ To compile the source code and download all required dependencies, run:
 mvn clean compile
 ```
 
-2. Running the Application
+### 2. Running the Application
 To execute the main runner and see the sample FanDuel inputs/outputs in your console:
 ```bash
 mvn exec:java -Dexec.mainClass="com.trading.depthcharts.DepthChartApplication"
 ```
 
-3. Running Unit Tests
+### 3. Running Unit Tests
 This core engine is heavily fortified by a comprehensive JUnit 5 test suite covering all edge cases, exceptions, and boundary limits. To execute the tests, run:
 ```bash
 mvn test
 ```
 
-4. Generating the Surefire Test Report
+### 4. Generating the Surefire Test Report
 To generate a formatted HTML report of the test executions and coverage, run:
 ```bash
 mvn surefire-report:report
 ```
 
-After the build finishes, open the target/site/surefire-report.html file in your web browser to view the visual dashboard.
+After the build finishes, open the ```target/site/surefire-report.html``` file in your web browser to view the visual dashboard.
 
 ## 📋 Assumptions Made
 
 1. **Thread Safety:** As an in-memory coding challenge, the current `DepthChartManager` relies on standard collections and is not thread-safe. In a production environment with concurrent user requests, the underlying map would be swapped for a `ConcurrentHashMap` and `CopyOnWriteArrayList`, or managed via standard database row-locks.
-2. **Data Ingestion Boundary:** Processing an external HTML or JSON document to seed the initial data is considered out-of-scope for the core manager to adhere to the Single Responsibility Principle. In a real system, an external adapter or factory class would parse the DOM and pass the sanitized `Player` records to the manager.
+2. **Data Ingestion Boundary:** Parsing the provided HTML to seed initial data was treated as out-of-scope to adhere to the Single Responsibility Principle. The system is designed as an API that accepts clean Player objects.
 3. **Data Model Integrity over Output Typos:** The assignment PDF listed players like Jaelon Darden and Mike Evans occasionally as "WR" or "QB" in the sample outputs, but the data model clearly defined them as "LWR". I assumed the initial data model table was the source of truth, and updated the `DepthChartApplication.java` runner to use the correct positions.
 4. **Team Identity Validation:** To avoid hardcoding all 32 NFL franchises into a static Enum, the system relies on constructor validation for basic string integrity. It is assumed that in a production environment, team identity strings are validated upstream by the database or calling service.
 

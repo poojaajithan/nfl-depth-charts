@@ -83,11 +83,13 @@ public class DepthChartManagerTest {
     @Test
     void testAddPlayerInvalidPositionDepth() {
         manager.addPlayerToDepthChart("QB", tomBrady, null);
-        manager.addPlayerToDepthChart("QB", blaineGabbert, 99); 
 
-        List<Player> backups = manager.getBackups("QB", tomBrady);
-        assertEquals(1, backups.size());
-        assertEquals(blaineGabbert, backups.get(0));
+        Exception exception = Assertions.assertThrows(
+            DepthChartException.class, 
+            () -> manager.addPlayerToDepthChart("QB", blaineGabbert, 99)
+        );
+
+        assertTrue(exception.getMessage().contains("exceeds the maximum allowed depth"));
     }
 
     @Test
@@ -139,8 +141,7 @@ public class DepthChartManagerTest {
             () -> manager.addPlayerToDepthChart("QB", extraPlayer, 5)
         );
 
-        assertTrue(exception.getMessage().contains("Maxium depth of " + Sport.NFL.getMaxDepthPerPosition() + " reached"));
-    }
+        assertTrue(exception.getMessage().contains("exceeds the maximum allowed depth"));    }
 
     @Test
     void testAddPlayerMaxRosterSize() {
@@ -156,8 +157,8 @@ public class DepthChartManagerTest {
             DepthChartException.class, 
             () -> manager.addPlayerToDepthChart("QB", extraPlayer, 0)
         );
-        assertTrue(exception.getMessage().contains("Maxium roster limit of " + Sport.NFL.getMaxRosterSize() + " reached"));
-        
+        assertTrue(exception.getMessage().contains("Maximum roster limit of " + Sport.NFL.getMaxRosterSize() + " reached"));
+
         Player existingPlayer = new Player(0, "Player 0"); 
         String originalPos = allPositions[0].name(); 
         

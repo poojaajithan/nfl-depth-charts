@@ -18,7 +18,7 @@ import com.trading.depthcharts.exception.InvalidPlayerException;
 public record Player (int number, String name) {
 
     public Player {
-        // NFL range is typically 0 to 99
+
         if (number < 0 || number > 99) {
             throw new InvalidPlayerException("Player number must be between 0 and 99. Provided: " + number);
         }

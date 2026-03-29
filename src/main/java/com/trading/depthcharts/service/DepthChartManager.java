@@ -38,7 +38,7 @@ public class DepthChartManager {
         }
         
         if (teamNameShort == null || teamNameShort.trim().length() < 2 || teamNameShort.trim().length() > 3) {
-            throw new DepthChartException("Invalid team short name. Must be 2-3 characters (e.g., 'TB').");
+            throw new DepthChartException("Invalid team short name. Must be 2-3 characters.");
         }
         
         if (teamNameLong == null || teamNameLong.trim().isEmpty()) {
@@ -63,8 +63,13 @@ public class DepthChartManager {
         String formatPosition = validatePosition(position);
         Objects.requireNonNull(player, "Player cannot be null");
 
-        if (positionDepth != null && positionDepth < 0) {
-            throw new DepthChartException("Position depth cannot be negative. Provided: " + positionDepth);
+        if (positionDepth != null) {
+            if (positionDepth < 0) {
+                throw new DepthChartException("Position depth cannot be negative. Provided: " + positionDepth);
+            }
+            if (positionDepth >= sport.getMaxDepthPerPosition()) {
+                throw new DepthChartException("Requested depth " + positionDepth + " exceeds the maximum allowed depth of " + sport.getMaxDepthPerPosition() + "for " + sport.name());
+            }
         }
 
         List<Player> playersList = depthChart.computeIfAbsent(formatPosition, k -> new ArrayList<>());
