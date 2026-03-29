@@ -32,15 +32,23 @@ public class DepthChartManager {
     private final String teamNameLong;
     private final Sport sport;
 
-    //NFL active roster has exactly 53 players
-    private static final int MAX_ROSTER_SIZE = 53;
-    private static final int MAX_DEPTH_PER_POSITION = 5;
-
     public DepthChartManager(Sport sport, String teamNameShort, String teamNameLong) {
+        if (sport == null) {
+            throw new DepthChartException("Sport type is required to initialize depth chart.");
+        }
+        
+        if (teamNameShort == null || teamNameShort.trim().length() < 2 || teamNameShort.trim().length() > 3) {
+            throw new DepthChartException("Invalid team short name. Must be 2-3 characters (e.g., 'TB').");
+        }
+        
+        if (teamNameLong == null || teamNameLong.trim().isEmpty()) {
+            throw new DepthChartException("Team long name cannot be null or empty.");
+        }
+
+        this.sport = sport;
+        this.teamNameShort = teamNameShort.trim().toUpperCase();
+        this.teamNameLong = teamNameLong.trim();
         this.depthChart = new LinkedHashMap<>();
-        this.teamNameShort = Objects.requireNonNull(teamNameShort, "Short team name required");
-        this.teamNameLong = Objects.requireNonNull(teamNameLong, "Long team name required");
-        this.sport = Objects.requireNonNull(sport, "Sport type required");
     }
     
     /**
@@ -61,12 +69,12 @@ public class DepthChartManager {
 
         List<Player> playersList = depthChart.computeIfAbsent(formatPosition, k -> new ArrayList<>());
         
-        if (getTotalPlayersCount() >= MAX_ROSTER_SIZE && !playersList.contains(player)){
-            throw new DepthChartException("Maximum roster limit of " + MAX_ROSTER_SIZE + " reached.");
+        if (getTotalPlayersCount() >= sport.getMaxRosterSize() && !playersList.contains(player)){
+            throw new DepthChartException("Maximum roster limit of " + sport.getMaxRosterSize() + " reached.");
         }
         
-        if (playersList.size() >= MAX_DEPTH_PER_POSITION && !playersList.contains(player)){
-            throw new DepthChartException("Maximum depth of " + MAX_DEPTH_PER_POSITION + " reached for position: " + formatPosition);
+        if (playersList.size() >= sport.getMaxDepthPerPosition() && !playersList.contains(player)){
+            throw new DepthChartException("Maximum depth of " + sport.getMaxDepthPerPosition() + " reached for position: " + formatPosition);
         }
 
         // if player present, remove it first to prevent a duplicate entry

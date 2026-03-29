@@ -139,15 +139,14 @@ public class DepthChartManagerTest {
             () -> manager.addPlayerToDepthChart("QB", extraPlayer, 5)
         );
 
-        assertTrue(exception.getMessage().contains("Maximum depth of 5 reached"),
-            "Exception should specify max depth was reached.");
+        assertTrue(exception.getMessage().contains("Maxium depth of " + Sport.NFL.getMaxDepthPerPosition() + " reached"));
     }
 
     @Test
     void testAddPlayerMaxRosterSize() {
         Position[] allPositions = Position.values();
         
-        for (int i = 0; i < 53; i++) {
+        for (int i = 0; i < Sport.NFL.getMaxRosterSize(); i++) {
             String pos = allPositions[i % allPositions.length].name(); 
             manager.addPlayerToDepthChart(pos, new Player(i, "Player " + i), null);
         }
@@ -157,9 +156,8 @@ public class DepthChartManagerTest {
             DepthChartException.class, 
             () -> manager.addPlayerToDepthChart("QB", extraPlayer, 0)
         );
-        assertTrue(exception.getMessage().contains("Maximum roster limit of 53 reached"),
-            "Exception should specify max roster size reached");
-
+        assertTrue(exception.getMessage().contains("Maxium roster limit of " + Sport.NFL.getMaxRosterSize() + " reached"));
+        
         Player existingPlayer = new Player(0, "Player 0"); 
         String originalPos = allPositions[0].name(); 
         
@@ -438,5 +436,40 @@ public class DepthChartManagerTest {
         List<Player> dardenBackups = manager.getBackups("LWR", jaelonDarden);
         assertEquals(1, dardenBackups.size());
         assertEquals(scottMiller, dardenBackups.get(0));
+    }
+
+    @Test
+    void testConstructorNullSport() {
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(null, "TB", "Tampa Bay Buccaneers")
+        );
+    }
+
+    @Test
+    void testConstructorInvalidShortName() {
+
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(Sport.NFL, "T", "Tampa Bay Buccaneers")
+        );
+
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(Sport.NFL, "TBBB", "Tampa Bay Buccaneers")
+        );
+
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(Sport.NFL, null, "Tampa Bay Buccaneers")
+        );
+    }
+
+    @Test
+    void testConstructorEmptyLongName() {
+
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(Sport.NFL, "TB", "")
+        );
+
+        Assertions.assertThrows(DepthChartException.class, () -> 
+            new DepthChartManager(Sport.NFL, "TB", "   ")
+        );
     }
 }

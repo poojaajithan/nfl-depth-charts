@@ -6,6 +6,15 @@ import java.util.stream.Collectors;
 
 import com.trading.depthcharts.exception.InvalidPlayerException;
 
+/**
+ * Represents a single player on a depth chart.
+ *
+ * <p>Each player has a jersey number and a properly cased name. Validation ensures the
+ * number is within the NFL range and the name is not null, blank, or excessively long.</p>
+ * 
+ *  @author pajithan
+ */
+
 public record Player (int number, String name) {
 
     public Player {

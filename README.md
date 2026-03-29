@@ -60,6 +60,7 @@ After the build finishes, open the target/site/surefire-report.html file in your
 1. **Thread Safety:** As an in-memory coding challenge, the current `DepthChartManager` relies on standard collections and is not thread-safe. In a production environment with concurrent user requests, the underlying map would be swapped for a `ConcurrentHashMap` and `CopyOnWriteArrayList`, or managed via standard database row-locks.
 2. **Data Ingestion Boundary:** Processing an external HTML or JSON document to seed the initial data is considered out-of-scope for the core manager to adhere to the Single Responsibility Principle. In a real system, an external adapter or factory class would parse the DOM and pass the sanitized `Player` records to the manager.
 3. **Data Model Integrity over Output Typos:** The assignment PDF listed players like Jaelon Darden and Mike Evans occasionally as "WR" or "QB" in the sample outputs, but the data model clearly defined them as "LWR". I assumed the initial data model table was the source of truth, and updated the `DepthChartApplication.java` runner to use the correct positions.
+4. **Team Identity Validation:** To avoid hardcoding all 32 NFL franchises into a static Enum, the system relies on constructor validation for basic string integrity. It is assumed that in a production environment, team identity strings are validated upstream by the database or calling service.
 
 ## 📝 Notes on Requirement Corrections
 
